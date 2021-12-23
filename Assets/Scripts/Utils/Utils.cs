@@ -1,5 +1,5 @@
 // 
-// Copyright (c) SunnyMonster
+// Copyright 2021 SunnyMonster
 //
 
 using UnityEngine;
