@@ -19,6 +19,7 @@ public class Chunk
 
     private List<Vector3> _vertices = new List<Vector3>();
     private List<int> _triangles = new List<int>();
+    private List<Vector2> _uvs = new List<Vector2>();
 
     public Vector2Int ChunkPosition { get; private set; }
 
@@ -45,6 +46,8 @@ public class Chunk
         _chunkObject.name = coordinates.ToString();
         ChunkPosition = coordinates;
 
+        _chunkObject.GetComponent<MeshRenderer>().sharedMaterial.mainTexture = TextureStitcher.Instance.BlockTexAtlas;
+
         GenerateChunk();
         GenerateMesh();
         UpdateMesh();
@@ -55,13 +58,22 @@ public class Chunk
 
     private void GenerateChunk()
     {
+        var random = new System.Random();
+
         for (int x = 0; x < 16; x++)
         {
             for (int y = 0; y < 16; y++)
             {
                 for (int i = 0; i < 64; i++)
                 {
-                    _blocks.Add(new Vector3(x, i, y), new Block(x, i, y));
+                    if (random.Next(0, 2) < 1)
+                    {
+                        _blocks.Add(new Vector3(x, i, y), new b_Bedrock(x, i, y));
+                    }
+                    else
+                    {
+                        _blocks.Add(new Vector3(x, i, y), new b_WireframeBlock(x, i, y));
+                    }
                 }
             }
         }
@@ -74,58 +86,67 @@ public class Chunk
             // If there is a block next to the current block, 
             // don't add a face
             // Otherwise add a face
-            if (!_blocks.ContainsKey(block.Key + new Vector3(1, 0, 0)))
+            if (block.Value is SolidBlock)
             {
-                AddFace(
-                    block.Key + new Vector3(0.5f,  0.5f, -0.5f),
-                    block.Key + new Vector3(0.5f,  0.5f,  0.5f),
-                    block.Key + new Vector3(0.5f, -0.5f, -0.5f),
-                    block.Key + new Vector3(0.5f, -0.5f,  0.5f));
-            }
-            if (!_blocks.ContainsKey(block.Key + new Vector3(-1, 0, 0)))
-            {
-                AddFace(
-                    block.Key + new Vector3(-0.5f,  0.5f,  0.5f),
-                    block.Key + new Vector3(-0.5f,  0.5f, -0.5f),
-                    block.Key + new Vector3(-0.5f, -0.5f,  0.5f),
-                    block.Key + new Vector3(-0.5f, -0.5f, -0.5f));
-            }
-            if (!_blocks.ContainsKey(block.Key + new Vector3(0, 0, 1)))
-            {
-                AddFace(
-                    block.Key + new Vector3( 0.5f,  0.5f,  0.5f),
-                    block.Key + new Vector3(-0.5f,  0.5f,  0.5f),
-                    block.Key + new Vector3( 0.5f, -0.5f,  0.5f),
-                    block.Key + new Vector3(-0.5f, -0.5f,  0.5f));
-            }
-            if (!_blocks.ContainsKey(block.Key + new Vector3(0, 0, -1)))
-            {
-                AddFace(
-                    block.Key + new Vector3(-0.5f,  0.5f, -0.5f),
-                    block.Key + new Vector3( 0.5f,  0.5f, -0.5f),
-                    block.Key + new Vector3(-0.5f, -0.5f, -0.5f),
-                    block.Key + new Vector3( 0.5f, -0.5f, -0.5f));
-            }
-            if (!_blocks.ContainsKey(block.Key + new Vector3(0, 1, 0)))
-            {
-                AddFace(
-                    block.Key + new Vector3( 0.5f,  0.5f, -0.5f),
-                    block.Key + new Vector3(-0.5f,  0.5f, -0.5f),
-                    block.Key + new Vector3( 0.5f,  0.5f,  0.5f),
-                    block.Key + new Vector3(-0.5f,  0.5f,  0.5f));
-            }
-            if (!_blocks.ContainsKey(block.Key + new Vector3(0, -1, 0)))
-            {
-                AddFace(
-                    block.Key + new Vector3( 0.5f, -0.5f,  0.5f),
-                    block.Key + new Vector3(-0.5f, -0.5f,  0.5f),
-                    block.Key + new Vector3( 0.5f, -0.5f, -0.5f),
-                    block.Key + new Vector3(-0.5f, -0.5f, -0.5f));
+                if (!_blocks.ContainsKey(block.Key + new Vector3(1, 0, 0)) || !(_blocks[block.Key + new Vector3(1, 0, 0)] is SolidBlock))
+                {
+                    AddFace(
+                        block.Key + new Vector3(0.5f,  0.5f, -0.5f),
+                        block.Key + new Vector3(0.5f,  0.5f,  0.5f),
+                        block.Key + new Vector3(0.5f, -0.5f, -0.5f),
+                        block.Key + new Vector3(0.5f, -0.5f,  0.5f),
+                        (SolidBlock)block.Value);
+                }
+                if (!_blocks.ContainsKey(block.Key + new Vector3(-1, 0, 0)) || !(_blocks[block.Key + new Vector3(-1, 0, 0)] is SolidBlock))
+                {
+                    AddFace(
+                        block.Key + new Vector3(-0.5f,  0.5f,  0.5f),
+                        block.Key + new Vector3(-0.5f,  0.5f, -0.5f),
+                        block.Key + new Vector3(-0.5f, -0.5f,  0.5f),
+                        block.Key + new Vector3(-0.5f, -0.5f, -0.5f),
+                        (SolidBlock)block.Value);
+                }
+                if (!_blocks.ContainsKey(block.Key + new Vector3(0, 0, 1)) || !(_blocks[block.Key + new Vector3(0, 0, 1)] is SolidBlock))
+                {
+                    AddFace(
+                        block.Key + new Vector3( 0.5f,  0.5f,  0.5f),
+                        block.Key + new Vector3(-0.5f,  0.5f,  0.5f),
+                        block.Key + new Vector3( 0.5f, -0.5f,  0.5f),
+                        block.Key + new Vector3(-0.5f, -0.5f,  0.5f),
+                        (SolidBlock)block.Value);
+                }
+                if (!_blocks.ContainsKey(block.Key + new Vector3(0, 0, -1)) || !(_blocks[block.Key + new Vector3(0, 0, -1)] is SolidBlock))
+                {
+                    AddFace(
+                        block.Key + new Vector3(-0.5f,  0.5f, -0.5f),
+                        block.Key + new Vector3( 0.5f,  0.5f, -0.5f),
+                        block.Key + new Vector3(-0.5f, -0.5f, -0.5f),
+                        block.Key + new Vector3( 0.5f, -0.5f, -0.5f),
+                        (SolidBlock)block.Value);
+                }
+                if (!_blocks.ContainsKey(block.Key + new Vector3(0, 1, 0)) || !(_blocks[block.Key + new Vector3(0, 1, 0)] is SolidBlock))
+                {
+                    AddFace(
+                        block.Key + new Vector3( 0.5f,  0.5f, -0.5f),
+                        block.Key + new Vector3(-0.5f,  0.5f, -0.5f),
+                        block.Key + new Vector3( 0.5f,  0.5f,  0.5f),
+                        block.Key + new Vector3(-0.5f,  0.5f,  0.5f),
+                        (SolidBlock)block.Value);
+                }
+                if (!_blocks.ContainsKey(block.Key + new Vector3(0, -1, 0)) || !(_blocks[block.Key + new Vector3(0, -1, 0)] is SolidBlock))
+                {
+                    AddFace(
+                        block.Key + new Vector3( 0.5f, -0.5f,  0.5f),
+                        block.Key + new Vector3(-0.5f, -0.5f,  0.5f),
+                        block.Key + new Vector3( 0.5f, -0.5f, -0.5f),
+                        block.Key + new Vector3(-0.5f, -0.5f, -0.5f),
+                        (SolidBlock)block.Value);
+                }
             }
         }
     }
 
-    private void AddFace(Vector3 topLeft, Vector3 topRight, Vector3 bottomLeft, Vector3 bottomRight)
+    private void AddFace(Vector3 topLeft, Vector3 topRight, Vector3 bottomLeft, Vector3 bottomRight, SolidBlock block)
     {
         _vertices.Add(topLeft);
         _vertices.Add(topRight);
@@ -140,6 +161,13 @@ public class Chunk
         _triangles.Add(verticesLength - 1);
         _triangles.Add(verticesLength - 2);
         _triangles.Add(verticesLength);
+
+        var blockUV = block.Uv;
+
+        _uvs.Add(blockUV.topLeft);
+        _uvs.Add(blockUV.topRight);
+        _uvs.Add(blockUV.bottomLeft);
+        _uvs.Add(blockUV.bottomRight);
     }
 
     private void UpdateMesh()
@@ -147,6 +175,7 @@ public class Chunk
         Mesh mesh = new Mesh();
         mesh.vertices = _vertices.ToArray();
         mesh.triangles = _triangles.ToArray();
+        mesh.uv = _uvs.ToArray();
         mesh.RecalculateNormals();
         _chunkObject.GetComponent<MeshFilter>().sharedMesh = mesh;
         _chunkObject.GetComponent<MeshCollider>().sharedMesh = mesh;

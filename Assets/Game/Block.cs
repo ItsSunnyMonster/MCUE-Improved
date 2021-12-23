@@ -4,7 +4,7 @@
 
 using UnityEngine;
 
-public class Block
+public abstract class Block
 {
     public Vector3 ChunkPosition { get; private set; }
 
@@ -13,8 +13,5 @@ public class Block
         ChunkPosition = position;
     }
 
-    public Block(float x, float y, float z)
-    {
-        ChunkPosition = new Vector3(x, y, z);
-    }
+    public Block(float x, float y, float z) : this(new Vector3(x, y, z)) {}
 }
