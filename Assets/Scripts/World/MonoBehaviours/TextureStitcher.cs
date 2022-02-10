@@ -10,6 +10,10 @@ public class TextureStitcher : MonoBehaviour
     public static TextureStitcher Instance { get; private set; }
 
     [SerializeField] private Texture2D _blockTexAtlas;
+    public float uvOffset;
+
+    [HideInInspector] public float uvUnit;
+
     public Texture2D BlockTexAtlas { get { return _blockTexAtlas; } private set { _blockTexAtlas = value; } }
 
     private Dictionary<string, TextureUV> _blockTextures = new Dictionary<string, TextureUV>();
@@ -65,7 +69,7 @@ public class TextureStitcher : MonoBehaviour
                 }
             }
 
-            var uvUnit = 1f / allTextures.GetLength(0);
+            uvUnit = 1f / allTextures.GetLength(0);
             var topLeftUV = new Vector2(i * uvUnit, 1);
             _blockTextures.Add(texture.name, new TextureUV(topLeftUV, new Vector2(topLeftUV.x + uvUnit, 1), new Vector2(topLeftUV.x, 0), new Vector2(topLeftUV.x + uvUnit, 0)));
         } 
@@ -95,17 +99,18 @@ public class TextureStitcher : MonoBehaviour
 }
 
 public struct TextureUV
-    {
-        public Vector2 topLeft;
-        public Vector2 topRight;
-        public Vector2 bottomLeft;
-        public Vector2 bottomRight;
+{
+    public Vector2 topLeft;
+    public Vector2 topRight;
+    public Vector2 bottomLeft;
+    public Vector2 bottomRight;
 
-        public TextureUV(Vector2 topLeft, Vector2 topRight, Vector2 bottomLeft, Vector2 bottomRight)
-        {
-            this.topLeft = new Vector2(topLeft.x + 0.005f, topLeft.y - 0.005f);
-            this.topRight = new Vector2(topRight.x - 0.005f, topRight.y - 0.005f);
-            this.bottomLeft = new Vector2(bottomLeft.x + 0.005f, bottomLeft.y + 0.005f);
-            this.bottomRight = new Vector2(bottomRight.x - 0.005f, bottomRight.y + 0.005f);
-        }
+    public TextureUV(Vector2 topLeft, Vector2 topRight, Vector2 bottomLeft, Vector2 bottomRight)
+    {
+        TextureStitcher ts = TextureStitcher.Instance;
+        this.topLeft = new Vector2(topLeft.x + ts.uvOffset * ts.uvUnit, topLeft.y - ts.uvOffset * ts.uvUnit);
+        this.topRight = new Vector2(topRight.x - ts.uvOffset * ts.uvUnit, topRight.y - ts.uvOffset * ts.uvUnit);
+        this.bottomLeft = new Vector2(bottomLeft.x + ts.uvOffset * ts.uvUnit, bottomLeft.y + ts.uvOffset * ts.uvUnit);
+        this.bottomRight = new Vector2(bottomRight.x - ts.uvOffset * ts.uvUnit, bottomRight.y + ts.uvOffset * ts.uvUnit);
     }
+}
