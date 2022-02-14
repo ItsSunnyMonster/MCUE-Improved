@@ -34,8 +34,8 @@ public class TextureStitcher : MonoBehaviour
         var allTextures = Resources.LoadAll<Texture2D>("Textures/Blocks");
         var colourArray2D = new Color[allTextures.Length * 16, 16];
         var colourArray = new Color[allTextures.Length * 16 * 16];
-        BlockTexAtlas = new Texture2D(allTextures.Length * 16, 16);
-        BlockTexAtlas.filterMode = FilterMode.Point;
+        BlockTexAtlas = new Texture2D(allTextures.Length * 16, 16, TextureFormat.RGBA32, false);
+        BlockTexAtlas.filterMode = FilterMode.Point;    
 
         for (var i = 0; i < allTextures.Length; i++)
         {

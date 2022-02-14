@@ -48,13 +48,18 @@ public class Chunk
 
         _chunkObject.GetComponent<MeshRenderer>().sharedMaterial.mainTexture = TextureStitcher.Instance.BlockTexAtlas;
 
-        GenerateChunk();
-        GenerateMesh();
-        UpdateMesh();
+        WorldGenerator.Instance.AddFunctionToThread(ChunkGenThread);
     }
 
     public Chunk(int x, int z)
         : this(new Vector2Int(x, z)) {}
+
+    private void ChunkGenThread()
+    {
+        GenerateChunk();
+        GenerateMesh();
+        WorldGenerator.Instance.ExecuteOnMainThread(UpdateMesh);
+    }
 
     private void GenerateChunk()
     {
