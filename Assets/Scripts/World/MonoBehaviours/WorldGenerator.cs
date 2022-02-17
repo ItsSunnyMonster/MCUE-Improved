@@ -43,10 +43,7 @@ public class WorldGenerator : MonoBehaviour
     private void Update()
     {
         // Manage threading functions
-        if ((_chunkGenFuncs.Count > 0 && _activeThreads < _maxThreads) || _maxThreads == 0)
-        {
-            new Thread(new ThreadStart(ChunkGenThread)).Start();
-        }
+        TryCreateThread();
 
         // Manage main thread functions (including updating mesh and other Unity API calls)
         Action func = null;
@@ -66,6 +63,7 @@ public class WorldGenerator : MonoBehaviour
         {
             _chunkGenFuncs.Enqueue(func);
         }
+        TryCreateThread();
     }
 
     public void ExecuteOnMainThread(Action func)
@@ -94,5 +92,20 @@ public class WorldGenerator : MonoBehaviour
             function();
         }
         _activeThreads--;
+    }
+
+    private void CreateThread()
+    {
+        new Thread(new ThreadStart(ChunkGenThread)).Start();
+    }
+
+    private bool TryCreateThread()
+    {
+        if ((_chunkGenFuncs.Count > 0 && _activeThreads < _maxThreads) || _maxThreads == 0)
+        {
+            CreateThread();
+            return true;
+        }
+        return false;
     }
 }

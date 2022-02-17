@@ -35,7 +35,7 @@ public class TextureStitcher : MonoBehaviour
         var colourArray2D = new Color[allTextures.Length * 16, 16];
         var colourArray = new Color[allTextures.Length * 16 * 16];
         BlockTexAtlas = new Texture2D(allTextures.Length * 16, 16, TextureFormat.RGBA32, false);
-        BlockTexAtlas.filterMode = FilterMode.Point;    
+        BlockTexAtlas.filterMode = FilterMode.Point;
 
         for (var i = 0; i < allTextures.Length; i++)
         {
@@ -72,7 +72,7 @@ public class TextureStitcher : MonoBehaviour
             uvUnit = 1f / allTextures.GetLength(0);
             var topLeftUV = new Vector2(i * uvUnit, 1);
             _blockTextures.Add(texture.name, new TextureUV(topLeftUV, new Vector2(topLeftUV.x + uvUnit, 1), new Vector2(topLeftUV.x, 0), new Vector2(topLeftUV.x + uvUnit, 0)));
-        } 
+        }
 
         var index = 0;
         for (var y = 0; y < colourArray2D.GetLength(1); y++)
