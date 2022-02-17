@@ -5,13 +5,15 @@
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
-using Debug = System.Diagnostics.Debug;
 
 public static class CustomMenus
 {
     [MenuItem("GameObject/UI/Minecraft/Button")]
     private static void CreateButton()
     {
+        UnityEngine.Debug.LogWarning("Button is not implemented yet!");
+        return;
+
         GameObject button = null;
         // If nothing is selected
         if (Selection.activeTransform == null)
@@ -68,7 +70,7 @@ public static class CustomMenus
             }
         }
 
-        Debug.Assert(button != null, nameof(button) + " != null");
+        System.Diagnostics.Debug.Assert(button != null, nameof(button) + " != null");
         // Rename button
         button.name = "Button";
 
@@ -102,14 +104,14 @@ public static class CustomMenus
                 canvas = canvasGameObject.GetComponent<Canvas>();
                 canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             }
-            text = Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/UI/Text.prefab"), canvas.transform);
+            text = Object.Instantiate(Resources.Load<GameObject>("Prefabs/UI/Text"), canvas.transform);
         }
         else
         {
             var selection = Selection.activeTransform;
             if (selection.TryGetComponent<Canvas>(out var _) || selection.GetComponentInParent<Canvas>() != null)
             {
-                text = Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/UI/Text.prefab"), selection);
+                text = Object.Instantiate(Resources.Load<GameObject>("Prefabs/UI/Text"), selection);
             }
             else
             {
@@ -118,7 +120,7 @@ public static class CustomMenus
                 {
                     canvas = selection.GetChild(i).GetComponent<Canvas>();
                     if (canvas == null) continue;
-                    text = Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/UI/Text.prefab"), canvas.transform);
+                    text = Object.Instantiate(Resources.Load<GameObject>("Prefabs/UI/Text"), canvas.transform);
                     break;
                 }
                 if (canvas == null)
@@ -126,7 +128,7 @@ public static class CustomMenus
                     var canvasObject = new GameObject("Canvas", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
                     canvasObject.transform.SetParent(selection);
                     canvas = canvasObject.GetComponent<Canvas>();
-                    text = Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/UI/Text.prefab"), canvas.transform);
+                    text = Object.Instantiate(Resources.Load<GameObject>("Prefabs/UI/Text"), canvas.transform);
                 }
             }
         }
