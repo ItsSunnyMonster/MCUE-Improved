@@ -1,6 +1,19 @@
-// 
-// Copyright 2021 SunnyMonster
-//
+/*
+ *   Copyright (c) 2022 ItsSunnyMonster
+ *   All rights reserved.
+
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+
+ *   http://www.apache.org/licenses/LICENSE-2.0
+
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 
 using UnityEngine;
 using System.Collections.Generic;
@@ -38,27 +51,28 @@ public class Chunk
         }
 
         _chunkObject = Object.Instantiate(
-            Resources.Load<GameObject>("Prefabs/Chunk"), 
-//                                                                .z
-            new Vector3(coordinates.x * CHUNK_SIZE, 0, coordinates.y * CHUNK_SIZE), 
-            Quaternion.identity, 
+            Resources.Load<GameObject>("Prefabs/Chunk"),
+            //                                                                .z
+            new Vector3(coordinates.x * CHUNK_SIZE, 0, coordinates.y * CHUNK_SIZE),
+            Quaternion.identity,
             _chunkParent.transform);
         _chunkObject.name = coordinates.ToString();
         ChunkPosition = coordinates;
 
         _chunkObject.GetComponent<MeshRenderer>().sharedMaterial.mainTexture = TextureStitcher.Instance.BlockTexAtlas;
 
-        WorldGenerator.Instance.AddFunctionToThread(ChunkGenThread);
+        WorkerThread.Execute(ChunkGenThread);
     }
 
     public Chunk(int x, int z)
-        : this(new Vector2Int(x, z)) {}
+        : this(new Vector2Int(x, z)) { }
 
-    private void ChunkGenThread()
+    private dynamic ChunkGenThread()
     {
         GenerateChunk();
         GenerateMesh();
-        WorldGenerator.Instance.ExecuteOnMainThread(UpdateMesh);
+        WorkerThread.ExecuteOnMainThread(UpdateMesh);
+        return true;
     }
 
     private void GenerateChunk()
@@ -96,54 +110,54 @@ public class Chunk
                 if (!_blocks.ContainsKey(block.Key + new Vector3(1, 0, 0)) || !(_blocks[block.Key + new Vector3(1, 0, 0)] is SolidBlock))
                 {
                     AddFace(
-                        block.Key + new Vector3(0.5f,  0.5f, -0.5f),
-                        block.Key + new Vector3(0.5f,  0.5f,  0.5f),
+                        block.Key + new Vector3(0.5f, 0.5f, -0.5f),
+                        block.Key + new Vector3(0.5f, 0.5f, 0.5f),
                         block.Key + new Vector3(0.5f, -0.5f, -0.5f),
-                        block.Key + new Vector3(0.5f, -0.5f,  0.5f),
+                        block.Key + new Vector3(0.5f, -0.5f, 0.5f),
                         (SolidBlock)block.Value);
                 }
                 if (!_blocks.ContainsKey(block.Key + new Vector3(-1, 0, 0)) || !(_blocks[block.Key + new Vector3(-1, 0, 0)] is SolidBlock))
                 {
                     AddFace(
-                        block.Key + new Vector3(-0.5f,  0.5f,  0.5f),
-                        block.Key + new Vector3(-0.5f,  0.5f, -0.5f),
-                        block.Key + new Vector3(-0.5f, -0.5f,  0.5f),
+                        block.Key + new Vector3(-0.5f, 0.5f, 0.5f),
+                        block.Key + new Vector3(-0.5f, 0.5f, -0.5f),
+                        block.Key + new Vector3(-0.5f, -0.5f, 0.5f),
                         block.Key + new Vector3(-0.5f, -0.5f, -0.5f),
                         (SolidBlock)block.Value);
                 }
                 if (!_blocks.ContainsKey(block.Key + new Vector3(0, 0, 1)) || !(_blocks[block.Key + new Vector3(0, 0, 1)] is SolidBlock))
                 {
                     AddFace(
-                        block.Key + new Vector3( 0.5f,  0.5f,  0.5f),
-                        block.Key + new Vector3(-0.5f,  0.5f,  0.5f),
-                        block.Key + new Vector3( 0.5f, -0.5f,  0.5f),
-                        block.Key + new Vector3(-0.5f, -0.5f,  0.5f),
+                        block.Key + new Vector3(0.5f, 0.5f, 0.5f),
+                        block.Key + new Vector3(-0.5f, 0.5f, 0.5f),
+                        block.Key + new Vector3(0.5f, -0.5f, 0.5f),
+                        block.Key + new Vector3(-0.5f, -0.5f, 0.5f),
                         (SolidBlock)block.Value);
                 }
                 if (!_blocks.ContainsKey(block.Key + new Vector3(0, 0, -1)) || !(_blocks[block.Key + new Vector3(0, 0, -1)] is SolidBlock))
                 {
                     AddFace(
-                        block.Key + new Vector3(-0.5f,  0.5f, -0.5f),
-                        block.Key + new Vector3( 0.5f,  0.5f, -0.5f),
+                        block.Key + new Vector3(-0.5f, 0.5f, -0.5f),
+                        block.Key + new Vector3(0.5f, 0.5f, -0.5f),
                         block.Key + new Vector3(-0.5f, -0.5f, -0.5f),
-                        block.Key + new Vector3( 0.5f, -0.5f, -0.5f),
+                        block.Key + new Vector3(0.5f, -0.5f, -0.5f),
                         (SolidBlock)block.Value);
                 }
                 if (!_blocks.ContainsKey(block.Key + new Vector3(0, 1, 0)) || !(_blocks[block.Key + new Vector3(0, 1, 0)] is SolidBlock))
                 {
                     AddFace(
-                        block.Key + new Vector3( 0.5f,  0.5f, -0.5f),
-                        block.Key + new Vector3(-0.5f,  0.5f, -0.5f),
-                        block.Key + new Vector3( 0.5f,  0.5f,  0.5f),
-                        block.Key + new Vector3(-0.5f,  0.5f,  0.5f),
+                        block.Key + new Vector3(0.5f, 0.5f, -0.5f),
+                        block.Key + new Vector3(-0.5f, 0.5f, -0.5f),
+                        block.Key + new Vector3(0.5f, 0.5f, 0.5f),
+                        block.Key + new Vector3(-0.5f, 0.5f, 0.5f),
                         (SolidBlock)block.Value);
                 }
                 if (!_blocks.ContainsKey(block.Key + new Vector3(0, -1, 0)) || !(_blocks[block.Key + new Vector3(0, -1, 0)] is SolidBlock))
                 {
                     AddFace(
-                        block.Key + new Vector3( 0.5f, -0.5f,  0.5f),
-                        block.Key + new Vector3(-0.5f, -0.5f,  0.5f),
-                        block.Key + new Vector3( 0.5f, -0.5f, -0.5f),
+                        block.Key + new Vector3(0.5f, -0.5f, 0.5f),
+                        block.Key + new Vector3(-0.5f, -0.5f, 0.5f),
+                        block.Key + new Vector3(0.5f, -0.5f, -0.5f),
                         block.Key + new Vector3(-0.5f, -0.5f, -0.5f),
                         (SolidBlock)block.Value);
                 }
@@ -175,7 +189,7 @@ public class Chunk
         _uvs.Add(blockUV.bottomRight);
     }
 
-    private void UpdateMesh()
+    private dynamic UpdateMesh()
     {
         Mesh mesh = new Mesh();
         mesh.vertices = _vertices.ToArray();
@@ -184,5 +198,6 @@ public class Chunk
         mesh.RecalculateNormals();
         _chunkObject.GetComponent<MeshFilter>().sharedMesh = mesh;
         _chunkObject.GetComponent<MeshCollider>().sharedMesh = mesh;
+        return true;
     }
 }
