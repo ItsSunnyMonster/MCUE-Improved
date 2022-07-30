@@ -1,0 +1,22 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+#define BLOCK_TYPE_CPU 0
+#define BLOCK_TYPE_BEDROCK 1
+#define BLOCK_TYPE_WIREFRAME 2
+
+struct Block {
+    uint3 chunkPosition;
+    int blockType;
+};
+
+RWStructuredBuffer<Block> blocks;
+
+[numthreads(8,8,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    Block block;
+    block.chunkPosition = id;
+    block.blockType = BLOCK_TYPE_WIREFRAME;
+    blocks[id.x + id.y * 16 + id.z * 256] = block;
+}

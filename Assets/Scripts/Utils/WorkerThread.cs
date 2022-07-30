@@ -57,7 +57,7 @@ public class WorkerThread : MonoBehaviour
         }
     }
 
-    private void Start()
+    private void Awake()
     {
         if (Instance != null)
         {
@@ -66,7 +66,10 @@ public class WorkerThread : MonoBehaviour
             return;
         }
         Instance = this;
+    }
 
+    private void Start()
+    {
         new Thread(() =>
         {
             while (true)

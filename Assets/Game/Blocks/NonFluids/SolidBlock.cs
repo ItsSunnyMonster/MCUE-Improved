@@ -6,16 +6,16 @@ using UnityEngine;
 
 public class SolidBlock : Block
 {
-    protected virtual string Texture 
+    protected virtual string Texture
     {
         get { return "_default"; }
     }
 
-    public SolidBlock(Vector3 position) : base(position)
+    public SolidBlock(Vector3UInt position) : base(position)
     {
     }
 
-    public SolidBlock(float x, float y, float z) : base(x, y, z)
+    public SolidBlock(uint x, uint y, uint z) : base(x, y, z)
     {
     }
 

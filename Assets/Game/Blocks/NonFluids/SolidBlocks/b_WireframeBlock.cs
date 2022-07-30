@@ -6,11 +6,11 @@ using UnityEngine;
 
 public class b_WireframeBlock : SolidBlock
 {
-    public b_WireframeBlock(Vector3 position) : base(position)
+    public b_WireframeBlock(Vector3UInt position) : base(position)
     {
     }
 
-    public b_WireframeBlock(float x, float y, float z) : base(x, y, z)
+    public b_WireframeBlock(uint x, uint y, uint z) : base(x, y, z)
     {
     }
 

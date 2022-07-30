@@ -6,11 +6,11 @@ using UnityEngine;
 
 public class NonFluid : Block
 {
-    public NonFluid(Vector3 position) : base(position)
+    public NonFluid(Vector3UInt position) : base(position)
     {
     }
 
-    public NonFluid(float x, float y, float z) : base(x, y, z)
+    public NonFluid(uint x, uint y, uint z) : base(x, y, z)
     {
     }
 }
