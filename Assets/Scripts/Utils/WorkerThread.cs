@@ -1,4 +1,4 @@
-/*
+﻿/*
  *   Copyright (c) 2022 ItsSunnyMonster
  *   All rights reserved.
 
@@ -30,18 +30,26 @@ public class WorkerThread : MonoBehaviour
     private Queue<ThreadTask> _mainThreadTasks = new Queue<ThreadTask>();
     private Dictionary<int, ThreadTask> _finishedTasks = new Dictionary<int, ThreadTask>();
 
+    [SerializeField, ReadOnly] private int _activeThreads = 0;
+
     public static int Execute(Func<dynamic> task)
     {
         ThreadTask threadTask = new ThreadTask(task);
 
-        Instance._workerTasks.Enqueue(threadTask);
+        lock (Instance._workerTasks)
+        {
+            Instance._workerTasks.Enqueue(threadTask);
+        }
         return threadTask.Id;
     }
 
     public static int ExecuteOnMainThread(Func<dynamic> task)
     {
         ThreadTask threadTask = new ThreadTask(task);
-        Instance._mainThreadTasks.Enqueue(threadTask);
+        lock (Instance._mainThreadTasks)
+        {
+            Instance._mainThreadTasks.Enqueue(threadTask);
+        }
         return threadTask.Id;
     }
 
@@ -53,11 +61,11 @@ public class WorkerThread : MonoBehaviour
             {
                 return Instance._finishedTasks[ID].Result;
             }
-            //Thread.Sleep(1);
+            Thread.Sleep(1);
         }
     }
 
-    private void Start()
+    private void Awake()
     {
         if (Instance != null)
         {
@@ -66,36 +74,59 @@ public class WorkerThread : MonoBehaviour
             return;
         }
         Instance = this;
+    }
 
-        new Thread(() =>
+    private void Start()
+    {
+        for (int i = 0; i < SystemInfo.processorCount; i++)
         {
-            while (true)
-            {
-                if (_workerTasks.Count > 0)
-                {
-                    ThreadTask threadTask = _workerTasks.Dequeue();
-                    Stopwatch stopwatch = new Stopwatch();
-                    stopwatch.Start();
-                    threadTask.Result = threadTask.Task();
-                    stopwatch.Stop();
-                    //Debug.Log("Worker thread finished task " + threadTask.Id + " in " + stopwatch.ElapsedMilliseconds + "ms");
-                    _finishedTasks.Add(threadTask.Id, threadTask);
-                }
-                // else
-                // {
-                //     Thread.Sleep(1);
-                // }
-            }
-        }).Start();
+            new Thread(ThreadFunc).Start();
+            _activeThreads++;
+        }
     }
 
     private void Update()
     {
-        while (_mainThreadTasks.Count > 0)
+        if (_mainThreadTasks.Count > 0)
         {
-            ThreadTask threadTask = _mainThreadTasks.Dequeue();
+            ThreadTask threadTask;
+            lock (_mainThreadTasks)
+            {
+                threadTask = _mainThreadTasks.Dequeue();
+            }
             threadTask.Result = threadTask.Task();
-            _finishedTasks.Add(threadTask.Id, threadTask);
+            lock (_finishedTasks)
+            {
+                _finishedTasks.Add(threadTask.Id, threadTask);
+            }
+        }
+    }
+
+    private void ThreadFunc()
+    {
+        while (true)
+        {
+            if (_workerTasks.Count > 0)
+            {
+                ThreadTask threadTask;
+                lock (_workerTasks)
+                {
+                    threadTask = _workerTasks.Dequeue();
+                }
+                Stopwatch stopwatch = new Stopwatch();
+                stopwatch.Start();
+                threadTask.Result = threadTask.Task();
+                stopwatch.Stop();
+                //Debug.Log("<color=green>Worker thread finished task</color> <color=red>" + threadTask.Id + "</color> in " + stopwatch.ElapsedMilliseconds + "ms");
+                lock (_finishedTasks)
+                {
+                    _finishedTasks.Add(threadTask.Id, threadTask);
+                }
+            }
+            else
+            {
+                Thread.Sleep(1);
+            }
         }
     }
 }
